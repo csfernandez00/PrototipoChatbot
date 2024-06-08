@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import {
@@ -9,6 +9,7 @@ import {
 	MessageInput,
 	TypingIndicator,
 } from "@chatscope/chat-ui-kit-react";
+import SelectUser from "./components/SelectUser";
 
 const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
@@ -25,24 +26,14 @@ const promotions = [
 	{ category: "viajes", promo: "15% de descuento en paquetes turísticos" },
 ];
 
-const users = {
-	user1: {
-		name: "Juan",
-		transactions: ["sushi", "ropa", "cine"],
-	},
-	user2: {
+const users = [
+	{ id: "user1", name: "Juan", transactions: ["sushi", "ropa", "cine"] },
+	{
+		id: "user2",
 		name: "María",
 		transactions: ["tecnologia", "ropa", "supermercado"],
 	},
-	user3: {
-		name: "Carlos",
-		transactions: ["libros", "viajes", "sushi"],
-	},
-	user4: {
-		name: "Ana",
-		transactions: ["ropa", "supermercado", "cine"],
-	},
-};
+];
 
 const systemMessage = {
 	role: "system",
@@ -58,12 +49,23 @@ const systemMessage = {
 function App() {
 	const [messages, setMessages] = useState([
 		{
-			message: "Hola, en que puedo ayudarte?",
+			message: `Hola ${users[0].name}, en que puedo ayudarte?`,
 			sentTime: "just now",
 			sender: "ChatGPT",
 		},
 	]);
 	const [isTyping, setIsTyping] = useState(false);
+	const [selectedUser, setSelectedUser] = useState(users[0]);
+
+	useEffect(() => {
+		setMessages([
+			{
+				message: `Hola ${selectedUser.name}, en que puedo ayudarte?`,
+				sentTime: "just now",
+				sender: "ChatGPT",
+			},
+		]);
+	}, [selectedUser]);
 
 	const handleSend = async (message) => {
 		const newMessage = {
@@ -81,7 +83,7 @@ function App() {
 	};
 
 	async function processMessageToChatGPT(chatMessages) {
-		const currentUser = users.user1; // Cambiar a users.user2 para probar con otro usuario
+		const currentUser = selectedUser; // Cambiar a users.user2 para probar con otro usuario
 
 		const personalizedSystemMessage = {
 			...systemMessage,
@@ -130,6 +132,11 @@ function App() {
 	return (
 		<div className="App">
 			<div>
+				<SelectUser
+					users={users}
+					setSelectedUser={setSelectedUser}
+					setMessages={setMessages}
+				/>
 				<MainContainer
 					style={{
 						display: "flex",
